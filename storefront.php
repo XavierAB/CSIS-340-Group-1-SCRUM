@@ -1,14 +1,17 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Database connection setup
-$dbservername = "localhost";
-$dbusername = "your_db_username";
-$dbpassword = "your_db_password";
-$dbname = "your_database";
+$servername = "puff.mnstate.edu";
+$dbusername = "SQLUsername";
+$dbpassword = "SQLPassword";
+$dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
-$conn = new mysqli($dbservername, $dbusername, $dbpassword, $dbname);
+$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
@@ -25,7 +28,11 @@ $stmt->bind_param("s", $search_param);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Display the items that match the search criteria
+// Redirect to checkout.php if Save Cart & Checkout button is clicked
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_checkout'])) {
+    header("Location: http://puff.mnstate.edu/~is2364da/public/checkout.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +54,7 @@ $result = $stmt->get_result();
     <!-- Display items -->
     <?php
     if ($result->num_rows > 0) {
-        echo "<form action='checkout.php' method='POST'>";
+        echo "<form action='' method='POST'>";
         echo "<ul>";
         while ($row = $result->fetch_assoc()) {
             echo "<li>";
@@ -60,7 +67,7 @@ $result = $stmt->get_result();
         }
         echo "</ul>";
         echo "<input type='hidden' name='cart' value='" . htmlspecialchars(json_encode($_SESSION['cart'])) . "'>";
-        echo "<button type='submit'>Save Cart & Checkout</button>";
+        echo "<button type='submit' name='save_checkout'>Save Cart & Checkout</button>";
         echo "</form>";
 
         // Add a separate form for "Modify Account" button

@@ -1,11 +1,14 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Replace these database credentials with your own
-$servername = "localhost";
-$dbusername = "your_dbusername";
-$dbpassword = "your_dbpassword";
-$dbname = "your_database";
+$servername = "puff.mnstate.edu";
+$dbusername = "SQLUsername";
+$dbpassword = "SQLPassword";
+$dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
@@ -39,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute() === TRUE) {
             // User created successfully
-            header("Location: login.html"); // Redirect to login page after successful account creation
+            header("Location: http://puff.mnstate.edu/~is2364da/public/login.html"); // Redirect to login page after successful account creation
             exit;
         } else {
             echo "Error: " . $stmt->error;

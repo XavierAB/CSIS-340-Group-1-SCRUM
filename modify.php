@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Check if the user is logged in, if not, redirect to login page
@@ -8,10 +11,10 @@ if (!isset($_SESSION["username"])) {
 }
 
 // Database connection setup
-$dbservername = "localhost";
-$dbusername = "your_db_username";
-$dbpassword = "your_db_password";
-$dbname = "your_database";
+$servername = "puff.mnstate.edu";
+$dbusername = "SQLUsername";
+$dbpassword = "SQLPassword";
+$dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
 $conn = new mysqli($dbservername, $dbusername, $dbpassword, $dbname);
@@ -48,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($updateStmt->execute()) {
             // Update session username if the username was changed
             $_SESSION["username"] = $newUsername;
-            header("Location: login.html");
+            header("Location: http://puff.mnstate.edu/~is2364da/public/login.html");
             exit;
         } else {
             echo "Error updating account details: " . $conn->error;

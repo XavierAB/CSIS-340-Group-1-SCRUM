@@ -1,17 +1,20 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Check if the user is logged in as admin
 if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
-    header("Location: login.html");
+    header("Location: http://puff.mnstate.edu/~is2364da/public/login.html");
     exit;
 }
 
 // Database connection setup
-$servername = "localhost";
-$dbusername = "your_dbusername";
-$dbpassword = "your_dbpassword";
-$dbname = "your_database";
+$servername = "puff.mnstate.edu";
+$dbusername = "SQLUsername";
+$dbpassword = "SQLPassword";
+$dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);

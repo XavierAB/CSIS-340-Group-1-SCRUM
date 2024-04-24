@@ -1,11 +1,14 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Database connection setup
-$servername = "localhost";
-$dbusername = "your_dbusername";
-$dbpassword = "your_dbpassword";
-$dbname = "your_database";
+$servername = "puff.mnstate.edu";
+$dbusername = "SQLUsername";
+$dbpassword = "SQLPassword";
+$dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
@@ -57,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         unset($_SESSION['cart']);
 
         // Redirect back to storefront.php
-        header("Location: storefront.php");
+        header("Location: http://puff.mnstate.edu/~is2364da/public/storefront.php");
         exit;
     }
 }
