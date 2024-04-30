@@ -1,13 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
 
 // Database connection setup
 $servername = "puff.mnstate.edu";
-$dbusername = "SQLUsername";
-$dbpassword = "SQLPassword";
+$dbusername = "alexander-botz";
+$dbpassword = "Pegman101";
 $dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
@@ -18,11 +15,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if the cart exists in session
-if (!isset($_SESSION['cart'])) {
-    echo "No items in the cart.";
-    exit;
+// Check if the cart exists in cookies and retrieve cart data
+$cart = [];
+if (isset($_COOKIE['cart'])) {
+    $cart = json_decode($_COOKIE['cart'], true);
 }
+
+// Set $totalCost forcefully to $1500
+$totalCost = 1500;
 
 // Process checkout
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Please fill in all customer information.";
     } else {
         // Perform checkout and update stock
-        foreach ($_SESSION['cart'] as $itemId => $quantity) {
+        foreach ($cart as $itemId => $quantity) {
             // Fetch item details from the database
             $stmt = $conn->prepare("SELECT * FROM items WHERE id=?");
             $stmt->bind_param("i", $itemId);
@@ -56,8 +56,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $insertStmt->execute();
         }
 
-        // Clear the cart
-        unset($_SESSION['cart']);
+        // Clear the cart cookie
+        setcookie('cart', '', time() - 3600, "/"); // Set the expiration time to a past value
 
         // Redirect back to storefront.php
         header("Location: http://puff.mnstate.edu/~is2364da/public/storefront.php");
@@ -82,8 +82,7 @@ $conn->close();
         <h3>Cart Items</h3>
         <ul>
             <?php
-            $totalCost = 0;
-            foreach ($_SESSION['cart'] as $itemId => $quantity) {
+            foreach ($cart as $itemId => $quantity) {
                 // Fetch item details from the database
                 $stmt = $conn->prepare("SELECT * FROM items WHERE id=?");
                 $stmt->bind_param("i", $itemId);
@@ -91,12 +90,8 @@ $conn->close();
                 $result = $stmt->get_result();
                 $item = $result->fetch_assoc();
 
-                // Calculate item cost
-                $itemCost = $quantity * $item['price'];
-                $totalCost += $itemCost;
-
                 // Display item information
-                echo "<li>{$item['name']} - Quantity: $quantity - Cost: $itemCost</li>";
+                echo "<li>{$item['name']} - Quantity: $quantity</li>";
             }
             ?>
         </ul>

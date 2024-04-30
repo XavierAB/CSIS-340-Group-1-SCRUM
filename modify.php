@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
 
 // Check if the user is logged in, if not, redirect to login page
@@ -12,12 +9,12 @@ if (!isset($_SESSION["username"])) {
 
 // Database connection setup
 $servername = "puff.mnstate.edu";
-$dbusername = "SQLUsername";
-$dbpassword = "SQLPassword";
+$dbusername = "alexander-botz";
+$dbpassword = "Pegman101";
 $dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
-$conn = new mysqli($dbservername, $dbusername, $dbpassword, $dbname);
+$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
@@ -33,35 +30,41 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $newUsername = $_POST["username"];
-    $newPassword = $_POST["password"];
+    // Check if username and password are set in the POST data
+    if (isset($_POST["username"]) && isset($_POST["password"])) {
+        $newUsername = $_POST["username"];
+        $newPassword = $_POST["password"];
 
-    // Check if the new username already exists in the database (excluding the current user's username)
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username=? AND username<>?");
-    $stmt->bind_param("ss", $newUsername, $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        // Check if the new username already exists in the database (excluding the current user's username)
+        $checkStmt = $conn->prepare("SELECT * FROM users WHERE username=? AND username<>?");
+        $checkStmt->bind_param("ss", $newUsername, $username);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
 
-    if ($result->num_rows > 0) {
-        echo "Username already exists. Please choose a different one.";
-    } else {
-        // Update user's account details
-        $updateStmt = $conn->prepare("UPDATE users SET username=?, password=? WHERE username=?");
-        $updateStmt->bind_param("sss", $newUsername, $newPassword, $username);
-        if ($updateStmt->execute()) {
-            // Update session username if the username was changed
-            $_SESSION["username"] = $newUsername;
-            header("Location: http://puff.mnstate.edu/~is2364da/public/login.html");
-            exit;
+        if ($checkResult->num_rows > 0) {
+            echo "Username already exists. Please choose a different one.";
         } else {
-            echo "Error updating account details: " . $conn->error;
+            // Update user's account details
+            $updateStmt = $conn->prepare("UPDATE users SET username=?, password=? WHERE username=?");
+            $updateStmt->bind_param("sss", $newUsername, $newPassword, $username);
+            if ($updateStmt->execute()) {
+                // Update session username if the username was changed
+                $_SESSION["username"] = $newUsername;
+                header("Location: http://puff.mnstate.edu/~is2364da/public/login.html");
+                exit;
+            } else {
+                echo "Error updating account details: " . $conn->error;
+            }
         }
-    }
 
-    $updateStmt->close();
-    $stmt->close();
+        $checkStmt->close();
+        $updateStmt->close();
+    } else {
+        echo "Username or password not provided.";
+    }
 }
 
+$stmt->close();
 $conn->close();
 ?>
 
@@ -76,9 +79,9 @@ $conn->close();
     <h2>Modify Account</h2>
     <form action="" method="POST">
         <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($row['username']); ?>" required><br><br>
+        <input type="text" id="username" name="username" value="<?php echo isset($row['username']) ? htmlspecialchars($row['username']) : ''; ?>" required><br><br>
         <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" value="<?php echo htmlspecialchars($row['password']); ?>" required><br><br>
+        <input type="password" id="password" name="password" value="<?php echo isset($row['password']) ? htmlspecialchars($row['password']) : ''; ?>" required><br><br>
         <input type="submit" value="Save Changes">
     </form>
 </body>

@@ -1,13 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
 
 // Replace these database credentials with your own
 $servername = "puff.mnstate.edu";
-$dbusername = "SQLUsername";
-$dbpassword = "SQLPassword";
+$dbusername = "alexander-botz";
+$dbpassword = "Pegman101";
 $dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection

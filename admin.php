@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
 
 // Check if the user is logged in as admin
@@ -12,8 +9,8 @@ if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
 
 // Database connection setup
 $servername = "puff.mnstate.edu";
-$dbusername = "SQLUsername";
-$dbpassword = "SQLPassword";
+$dbusername = "alexander-botz";
+$dbpassword = "Pegman101";
 $dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection

@@ -1,13 +1,9 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-session_start();
 
 // Database connection setup
 $servername = "puff.mnstate.edu";
-$dbusername = "SQLUsername";
-$dbpassword = "SQLPassword";
+$dbusername = "alexander-botz";
+$dbpassword = "Pegman101";
 $dbname = "alexander-botz_TinkerBuyInc";
 
 // Create connection
@@ -28,11 +24,55 @@ $stmt->bind_param("s", $search_param);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Redirect to checkout.php if Save Cart & Checkout button is clicked
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_checkout'])) {
-    header("Location: http://puff.mnstate.edu/~is2364da/public/checkout.php");
-    exit;
+// Initialize cart array
+$cart = [];
+
+// Check if cart cookie exists and retrieve cart data
+if (isset($_COOKIE['cart'])) {
+    $cart = json_decode($_COOKIE['cart'], true);
+} else {
+    $cart = [];
 }
+
+// Check if the cookie is being set
+setcookie('cart', json_encode($cart), time() + (86400 * 30), "/");
+echo "Cookie set: " . json_encode($cart) . "<br>";
+
+// Check if the cookie is being retrieved
+if (isset($_COOKIE['cart'])) {
+    $cart = json_decode($_COOKIE['cart'], true);
+    echo "Cookie retrieved: " . $_COOKIE['cart'] . "<br>";
+} else {
+    $cart = [];
+    echo "Cookie not retrieved. <br>";
+}
+
+
+// Handle adding or removing items from the cart
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if the form is submitted for adding/removing items from the cart
+    if (isset($_POST['item']) && is_array($_POST['item'])) {
+        foreach ($_POST['item'] as $item_id) {
+            if (isset($_POST['quantity'][$item_id])) {
+                $quantity = intval($_POST['quantity'][$item_id]);
+                if ($quantity > 0) {
+                    // Add or update item in the cart
+                    $cart[$item_id] = $quantity;
+                } else {
+                    // Remove item from the cart if quantity is 0 or less
+                    unset($cart[$item_id]);
+                }
+            }
+        }
+        // Update the cart cookie
+        setcookie('cart', json_encode($cart), time() + (86400 * 30), "/");
+    }
+}
+
+// Print out the contents of the cart cookie
+echo "<pre>";
+print_r($cart);
+echo "</pre>";
 ?>
 
 <!DOCTYPE html>
@@ -54,19 +94,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_checkout'])) {
     <!-- Display items -->
     <?php
     if ($result->num_rows > 0) {
-        echo "<form action='' method='POST'>";
+        echo "<form action='checkout.php' method='POST'>";
         echo "<ul>";
         while ($row = $result->fetch_assoc()) {
             echo "<li>";
-            echo "<input type='checkbox' name='item[]' value='" . $row['id'] . "'>";
+            echo "<input type='checkbox' name='item[]' value='" . $row['id'] . "' " . (isset($cart[$row['id']]) ? 'checked' : '') . ">";
             echo "<span>" . $row['name'] . "</span>";
             echo "<span>Stock: " . $row['stock'] . "</span>";
             echo "<span>Price: $" . $row['price'] . "</span>";
-            echo "<input type='number' name='quantity[]' value='0' min='0'>";
+            echo "<input type='number' name='quantity[" . $row['id'] . "]' value='" . (isset($cart[$row['id']]) ? $cart[$row['id']] : '0') . "' min='0'>";
             echo "</li>";
         }
         echo "</ul>";
-        echo "<input type='hidden' name='cart' value='" . htmlspecialchars(json_encode($_SESSION['cart'])) . "'>";
+        // Hidden input for cart
+        echo "<input type='hidden' name='cart' value='" . htmlspecialchars(json_encode($cart)) . "'>";
         echo "<button type='submit' name='save_checkout'>Save Cart & Checkout</button>";
         echo "</form>";
 
